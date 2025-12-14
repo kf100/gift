@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Compliance Portal</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- 1. GLOBAL RESET & LAYOUT --- */
+        :root {
+            --primary: #4F46E5;
+            /* Indigo */
+            --primary-dark: #4338ca;
+            --success: #10B981;
+            /* Emerald */
+            --danger: #EF4444;
+            /* Red */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* --- 2. MAIN CARD CONTAINER --- */
+        .page-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            max-width: 600px;
+            width: 100%;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .page-container.active {
+            display: block;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- 3. TYPOGRAPHY --- */
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            color: #111827;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #4b5563;
+            margin-bottom: 20px;
+        }
+
+        /* --- 4. FORM INPUTS --- */
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* --- 5. CAMERA & UI --- */
+        .media-container {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 15px;
+        }
+
+        #camera-feed,
+        #photo-canvas {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: scan 2s linear infinite;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+            }
+
+            50% {
+                top: 100%;
+            }
+
+            100% {
+                top: 0;
+            }
+        }
+
+        /* --- 6. BUTTONS --- */
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        button[type="submit"],
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #capture-btn {
+            background: white;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            margin-top: 10px;
+        }
+
+        #capture-btn.retake-mode {
+            background: #fffbeb;
+            color: #d97706;
+            border-color: #fcd34d;
+        }
+
+        /* --- 7. GIFT CARD & UNLOCK STYLES --- */
+        .gift-card-visual {
+            background: linear-gradient(135deg, #111827 0%, #374151 100%);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            margin-top: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .card-logo {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-chip {
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #fef3c7 0%, #d97706 100%);
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            white-space: nowrap;
+            overflow-x: hidden;
+        }
+
+        /* UNLOCK SECTION STYLES */
+        .unlock-container {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #e5e7eb;
+        }
+
+        .unlock-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .unlock-input-group input {
+            flex: 2;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .unlock-input-group button {
+            flex: 1;
+            margin-top: 0;
+            background: #374151;
+            /* Dark Grey */
+        }
+
+        #copy-btn {
+            background: var(--success);
+            display: none;
+            /* Hidden by default */
+            margin-top: 15px;
+        }
+
+        /* Helpers */
+        .reveal-box {
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #prank-message {
+            background: #FEF2F2;
+            border: 2px solid #FECACA;
+            color: #991B1B;
+            text-align: center;
+        }
+
+        #gift-message {
+            display: none;
+            opacity: 0;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #FEF2F2;
+            color: #DC2626;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #FECACA;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option:hover {
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .question {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="page1" class="page-container active">
+        <h1>Jobins Secrete Santa Gift🎅</h1>
+        <h2>Identity Verification</h2>
+        <!-- <p>Welcome to the <strong>Christmas Release Candidate (RC-25)</strong> environment. Mandatory identity
+            verification is required before proceeding.</p> -->
+        <p>Welcome to the <strong>Christmas Gift Portal. </strong>You might be the KYC King of Dhan but you need to go
+            through KYC in order to reach your Gift Voucher.</p>
+        <form id="kyc-form" data-expected-name="kal" data-expected-id="1">
+            <!-- <form id="kyc-form" data-expected-name="kal" data-expected-id="1"> -->
+
+            <label for="name">1. Full Legal Name</label>
+            <input type="text" id="name" placeholder="e.g. John Doe" required autocomplete="off">
+
+            <div style="height: 15px;"></div>
+
+            <label for="alias">2. DHAN CLIENT ID</label>
+            <input type="text" id="alias" placeholder="e.g. 1100222348" required autocomplete="off">
+
+            <div style="height: 25px;"></div>
+
+            <label>3. Biometric Identity Capture</label>
+            <div class="media-container">
+                <div class="scan-line"></div>
+                <video id="camera-feed" autoplay playsinline muted></video>
+                <canvas id="photo-canvas" style="display: none;"></canvas>
+            </div>
+
+            <button type="button" id="capture-btn">Capture Photo 📸</button>
+            <div id="kyc-error" class="error-message"></div>
+            <button type="submit" id="start-quiz-btn" disabled>Verify & Begin Assessment</button>
+        </form>
+    </div>
+
+    <div id="page2" class="page-container">
+        <h1>Small Assessment</h1>
+        <!-- <h2>QA Certification Module V1.2</h2> -->
+        <!-- <p>Please complete the following technical validation to confirm your role permissions.</p> -->
+        <p>We are getting your details verified at our backend till that time you need to go through small assessment to
+            reach the gift</p>
+        <form id="quiz-form">
+            <div class="question">
+                <p>1. What is the primary focus of <strong>Regression Testing</strong>?</p>
+                <label class="radio-option"><input type="radio" name="q1" value="A" required> <span>Ensuring new changes
+                        haven't broken existing functionality.</span></label>
+                <label class="radio-option"><input type="radio" name="q1" value="B"> <span>Testing the performance of
+                        the system under heavy load.</span></label>
+            </div>
+
+            <div class="question">
+                <p>2. Which testing technique is based on the internal logic and code structure?</p>
+                <label class="radio-option"><input type="radio" name="q2" value="A"> <span>Black Box
+                        Testing</span></label>
+                <label class="radio-option"><input type="radio" name="q2" value="B" required> <span>White Box
+                        Testing</span></label>
+            </div>
+
+            <div class="question">
+                <p>3. In the context of a bug report, what does <strong>Severity</strong> represent?</p>
+                <label class="radio-option"><input type="radio" name="q3" value="A" required> <span>The technical impact
+                        of the defect on the system's functionality.</span></label>
+                <label class="radio-option"><input type="radio" name="q3" value="B"> <span>How quickly the business
+                        needs the defect to be fixed.</span></label>
+            </div>
+
+            <div class="question">
+                <p>4. What is the main objective of <strong>Smoke Testing</strong>?</p>
+                <label class="radio-option"><input type="radio" name="q4" value="A" required> <span>To verify if the
+                        most critical functions of a build work.</span></label>
+                <label class="radio-option"><input type="radio" name="q4" value="B"> <span>To find every possible minor
+                        UI bug in the application.</span></label>
+            </div>
+
+            <div class="question">
+                <p>5. <strong>Boundary Value Analysis</strong> (BVA) focuses on testing:</p>
+                <label class="radio-option"><input type="radio" name="q5" value="A"> <span>The middle values of an input
+                        range.</span></label>
+                <label class="radio-option"><input type="radio" name="q5" value="B" required> <span>Values at the edges
+                        of input limits (e.g., minimum and maximum).</span></label>
+            </div>
+
+            <div class="question">
+                <p>6. Which of the following is an example of <strong>Non-Functional Testing</strong>?</p>
+                <label class="radio-option"><input type="radio" name="q6" value="A"> <span>Unit Testing</span></label>
+                <label class="radio-option"><input type="radio" name="q6" value="B" required> <span>Usability
+                        Testing</span></label>
+            </div>
+
+            <div class="question">
+                <p>7. When is <strong>Alpha Testing</strong> typically performed?</p>
+                <label class="radio-option"><input type="radio" name="q7" value="A" required> <span>By internal testers
+                        before the product is released to external users.</span></label>
+                <label class="radio-option"><input type="radio" name="q7" value="B"> <span>By end-users in their own
+                        environment after the product is live.</span></label>
+            </div>
+
+            <div class="question">
+                <p>8. What is a <strong>Test Case</strong>?</p>
+                <label class="radio-option"><input type="radio" name="q8" value="A" required> <span>A set of conditions,
+                        steps, and expected results to verify a feature.</span></label>
+                <label class="radio-option"><input type="radio" name="q8" value="B"> <span>A document that describes the
+                        overall testing strategy and scope.</span></label>
+            </div>
+
+            <div class="question">
+                <p>9. <strong>Exploratory Testing</strong> is best described as:</p>
+                <label class="radio-option"><input type="radio" name="q9" value="A"> <span>Testing based on a
+                        predefined, rigid script.</span></label>
+                <label class="radio-option"><input type="radio" name="q9" value="B" required> <span>Simultaneous
+                        learning, test design, and execution.</span></label>
+            </div>
+
+            <div class="question">
+                <p>10. What does the term <strong>'Defect Density'</strong> refer to?</p>
+                <label class="radio-option"><input type="radio" name="q10" value="A" required> <span>The number of
+                        defects confirmed relative to the size of the module.</span></label>
+                <label class="radio-option"><input type="radio" name="q10" value="B"> <span>The total time taken to fix
+                        all reported defects.</span></label>
+            </div>
+            <button type="submit" id="validate-btn">Validate & Submit Results</button>
+        </form>
+    </div>
+
+    <div id="page3" class="page-container">
+
+        <div id="prank-message" class="reveal-box">
+            <h1 style="color: #991B1B;">⛔ ACCESS DENIED</h1>
+            <h2>STATUS: PASS</h2>
+            <p style="font-weight: bold; font-size: 1.1rem; margin-top: 20px;">
+                Congratulations!🎉 You have been successfully been Pranked.
+            </p>
+        </div>
+
+        <div id="gift-message" data-real-code="AMZN-ABCD-EFGH-IJKL" data-secret-pin="2025">
+
+            <h1 style="color: #10B981;">Relax Bro!</h1>
+            <!-- <p>System rolled back to <strong>'Gift Giving Module'</strong>.</p> -->
+            <p> <strong>'You have been pranked again'</strong>.</p>
+            <p>Merry Christmas! Enjoy your Gift Voucher.</p>
+
+            <div class="gift-card-visual">
+                <div class="card-logo">
+                    <span>MERRY XMAS</span>
+                    <span>❄️</span>
+                </div>
+                <div class="card-chip"></div>
+
+                <div class="code-display" id="voucher-display">
+                    ****-****-****-SECRET
+                </div>
+
+                <div class="pin-display">
+                    VALID THRU: 12/25<br>
+                    STATUS: <span id="status-text">LOCKED 🔒</span>
+                </div>
+            </div>
+
+            <div class="unlock-container" id="unlock-container">
+                <label for="secret-pin-input">Enter Secret PIN to Reveal Code:</label>
+                <div class="unlock-input-group">
+                    <input type="text" id="secret-pin-input" placeholder="PIN from SMS/Card" maxlength="10">
+                    <button type="button" id="unlock-btn">UNLOCK</button>
+                </div>
+                <div id="unlock-error" class="error-message">❌ Incorrect PIN. Check external source.</div>
+            </div>
+
+            <button type="button" id="copy-btn">📋 Copy Code to Clipboard</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- VARIABLES ---
+            const page1 = document.getElementById('page1');
+            const page2 = document.getElementById('page2');
+            const page3 = document.getElementById('page3');
+            const kycForm = document.getElementById('kyc-form');
+            const quizForm = document.getElementById('quiz-form');
+            const nameInput = document.getElementById('name');
+            const aliasInput = document.getElementById('alias');
+            const startQuizBtn = document.getElementById('start-quiz-btn');
+            const kycError = document.getElementById('kyc-error');
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('photo-canvas');
+            const captureBtn = document.getElementById('capture-btn');
+            const scanLine = document.querySelector('.scan-line');
+
+            // UNLOCK VARIABLES
+            const giftMessageDiv = document.getElementById('gift-message');
+            const voucherDisplay = document.getElementById('voucher-display');
+            const secretPinInput = document.getElementById('secret-pin-input');
+            const unlockBtn = document.getElementById('unlock-btn');
+            const unlockError = document.getElementById('unlock-error');
+            const unlockContainer = document.getElementById('unlock-container');
+            const copyBtn = document.getElementById('copy-btn');
+            const statusText = document.getElementById('status-text');
+
+            let stream = null;
+            let photoCaptured = false;
+
+            // ⚠️ DATA RETRIEVAL
+            const EXPECTED_NAME = kycForm.getAttribute('data-expected-name').trim().toLowerCase();
+            const EXPECTED_ID = kycForm.getAttribute('data-expected-id').trim().toLowerCase();
+            const REAL_CODE = giftMessageDiv.getAttribute('data-real-code');
+            const SECRET_PIN = giftMessageDiv.getAttribute('data-secret-pin');
+
+            // --- NAVIGATION HELPERS ---
+            function navigate(from, to) {
+                from.classList.remove('active');
+                to.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // --- CAMERA SETUP ---
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                } catch (err) {
+                    kycError.style.display = 'block';
+                    kycError.innerText = "⚠️ Camera blocked. Please allow permissions.";
+                }
+            }
+            startCamera();
+
+            // --- PHOTO CAPTURE ---
+            captureBtn.addEventListener('click', () => {
+                if (!stream) return alert("Camera not active");
+                if (!photoCaptured) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    video.style.display = 'none';
+                    canvas.style.display = 'block';
+                    scanLine.style.display = 'none';
+                    captureBtn.innerText = "Retake Photo 🔄";
+                    captureBtn.classList.add('retake-mode');
+                    photoCaptured = true;
+                } else {
+                    video.style.display = 'block';
+                    canvas.style.display = 'none';
+                    scanLine.style.display = 'block';
+                    captureBtn.innerText = "Capture Photo 📸";
+                    captureBtn.classList.remove('retake-mode');
+                    photoCaptured = false;
+                }
+                validateInputs();
+            });
+
+            // --- KYC VALIDATION ---
+            function validateInputs() {
+                const currentName = nameInput.value.trim().toLowerCase();
+                const currentId = aliasInput.value.trim().toLowerCase();
+                if (currentName === EXPECTED_NAME && currentId === EXPECTED_ID && photoCaptured) {
+                    startQuizBtn.disabled = false;
+                    kycError.style.display = 'none';
+                } else {
+                    startQuizBtn.disabled = true;
+                    if (photoCaptured && (currentName !== EXPECTED_NAME || currentId !== EXPECTED_ID)) {
+                        kycError.style.display = 'block';
+                        kycError.innerText = "⚠️ Identity Verification Failed: Name or ID mismatch.";
+                    }
+                }
+            }
+            nameInput.addEventListener('input', validateInputs);
+            aliasInput.addEventListener('input', validateInputs);
+
+            // --- SUBMIT HANDLERS ---
+            kycForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                navigate(page1, page2);
+            });
+
+            quizForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                navigate(page2, page3);
+
+                // PRANK SEQUENCE
+                const prank = document.getElementById('prank-message');
+                prank.style.display = 'block';
+                setTimeout(() => {
+                    prank.style.opacity = '0';
+                    setTimeout(() => {
+                        prank.style.display = 'none';
+                        giftMessageDiv.style.display = 'block';
+                        setTimeout(() => { giftMessageDiv.style.opacity = '1'; }, 50);
+                    }, 1000);
+                }, 5000);
+            });
+
+            // --- UNLOCK & COPY LOGIC (NEW) ---
+            unlockBtn.addEventListener('click', () => {
+                const enteredPin = secretPinInput.value.trim();
+
+                if (enteredPin === SECRET_PIN) {
+                    // Success!
+                    voucherDisplay.innerText = REAL_CODE;
+                    unlockError.style.display = 'none';
+                    unlockContainer.style.display = 'none'; // Hide input
+                    copyBtn.style.display = 'block'; // Show Copy button
+                    statusText.innerText = "ACTIVE ✅";
+                    triggerConfetti();
+                } else {
+                    // Fail
+                    unlockError.style.display = 'block';
+                    secretPinInput.value = '';
+                }
+            });
+
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(REAL_CODE).then(() => {
+                    const originalText = copyBtn.innerText;
+                    copyBtn.innerText = "Copied! ✅";
+                    copyBtn.style.backgroundColor = "#059669"; // Darker green
+                    setTimeout(() => {
+                        copyBtn.innerText = originalText;
+                        copyBtn.style.backgroundColor = ""; // Reset
+                    }, 2000);
+                });
+            });
+
+            // Confetti Helper
+            function triggerConfetti() {
+                const colors = ['#f00', '#0f0', '#00f', '#ff0'];
+                for (let i = 0; i < 50; i++) {
+                    const conf = document.createElement('div');
+                    conf.style.position = 'fixed';
+                    conf.style.top = '-10px';
+                    conf.style.left = Math.random() * 100 + 'vw';
+                    conf.style.width = '10px';
+                    conf.style.height = '10px';
+                    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    conf.style.transition = `top ${Math.random() * 2 + 2}s ease-in, opacity 2s`;
+                    conf.style.borderRadius = '50%';
+                    document.body.appendChild(conf);
+                    setTimeout(() => {
+                        conf.style.top = '100vh';
+                        conf.style.opacity = '0';
+                    }, 100);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
